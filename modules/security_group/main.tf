@@ -1,7 +1,7 @@
 resource "aws_security_group" "allow_tls_http_ssh" {
   name        = "k8s-sg-blog"
   description = "Allow all inbound traffic"
-  vpc_id      = var.vpc_id
+  vpc_id      = data.aws_vpc.default_vpc.id
 
   ingress = [
     {
@@ -57,46 +57,4 @@ resource "aws_security_group" "allow_tls_http_ssh" {
       Environment = "test"
       Terraform = "true"
     }
-}
-
-resource "aws_instance" "controller" {
-  ami           = var.ami
-  instance_type = var.instance_type
-  security_groups = [ aws_security_group.allow_tls_http_ssh.id ]
-  subnet_id = var.subnet_id
-  associate_public_ip_address = true
-
-
-  tags = {
-    terraform = "true"
-    project = "kube-auto"
-  }
-
-  connection {
-    type = "ssh"
-    user = "ubuntu"
-    private_key = "${file(var.private_key_path)}"
-    host = "${self.public_ip}"
-  }
-
-  provisioner "file" {
-    source      = "./ansible/playbook.yaml"
-    destination = "/home/ubuntu/playbook.yaml"
-  }
-
-  provisioner "file" {
-    source      = "./ansible/install.sh"
-    destination = "/home/ubuntu/install.sh"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-        "chmod +x /home/ubuntu/install.sh",
-        "/home/ubuntu/install.sh"
-    ]
-  }
-  root_block_device {
-    delete_on_termination = true
-    volume_size = 8
-  }
 }

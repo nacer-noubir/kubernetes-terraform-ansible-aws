@@ -1,0 +1,50 @@
+---
+############### Install and configure prerequisites  ###############
+- name: Create the file for Forwarding IPv4 and iptables modules
+  file:
+    path: /etc/modules-load.d/k8s.conf
+    state: touch
+
+- name: configure Forwarding IPv4 and letting iptables see bridged traffic 
+  blockinfile:
+    path: /etc/modules-load.d/k8s.conf
+    block: |
+      overlay
+      br_netfilter
+
+- name: modprobe overlay
+  community.general.modprobe:
+      name: overlay
+      state: present
+
+- name: Verify that the overlay modules are loaded
+  shell: lsmod | grep overlay
+  register: overlay
+- debug: msg={{overlay.stdout_lines}}
+
+- name: modprobe br_netfilter
+  community.general.modprobe:
+      name: br_netfilter
+      state: present
+
+- name: Verify that the br_netfilter modules are loaded
+  shell: lsmod | grep br_netfilter
+  register: br_netfilter
+- debug: msg={{br_netfilter.stdout_lines}}
+
+- name:  sysctl params required by setup, params persist across reboots
+  sysctl:
+    name: "{{ item }}"
+    value: '1'
+    state: present
+    reload: true
+  loop:
+    - net.ipv4.ip_forward
+    - net.bridge.bridge-nf-call-ip6tables
+    - net.bridge.bridge-nf-call-iptables
+
+- name: Verify that the net.bridge.bridge-nf-call-iptables, net.bridge.bridge-nf-call-ip6tables, net.ipv4.ip_forward system variables are set to 1
+  shell: |
+    sysctl net.bridge.bridge-nf-call-iptables net.bridge.bridge-nf-call-ip6tables net.ipv4.ip_forward
+  register: bridge_net
+- debug: msg={{bridge_net.stdout_lines}}

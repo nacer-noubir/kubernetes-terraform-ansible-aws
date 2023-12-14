@@ -1,0 +1,46 @@
+- name: Update repositories cache and install "foo" package
+  apt:
+    pkg:
+    - ca-certificates
+    - curl gnupg
+    - lsb-release
+    - apt-transport-https
+    state: latest
+    update_cache: yes
+
+- name: create keyrings directory
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: 0755
+
+- name: Add Docker GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+
+- name: Add Docker APT repository
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/{{ ansible_system | lower }}/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable
+
+- name: install containerd
+  apt:
+    name: containerd.io
+    state: present
+    update_cache: yes
+
+- name: Apply the default configuration for the containerd
+  shell: | 
+    sudo containerd config default | sudo tee /etc/containerd/config.toml
+
+############### Configuring the systemd cgroup driver ###############
+- name: replace line
+  lineinfile: 
+    path: /etc/containerd/config.toml
+    regexp: 'SystemdCgroup = false' 
+    line: '            SystemdCgroup = true'
+    backrefs: yes
+
+- name: Restaring Containerd
+  systemd:ont
+    state: restarted
+    name: containerd

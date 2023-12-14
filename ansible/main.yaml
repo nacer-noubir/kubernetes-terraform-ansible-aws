@@ -1,0 +1,12 @@
+
+- hosts: all
+  name: setup kube prerequisites
+  roles:
+    - {  role: kube-prerequisites, tags: kube-prerequisites}
+
+############## Install containerd docker engine and Docker Compose###############
+- hosts: all
+  name: Install containerd
+  roles:
+    - { role: containerd, tags: containerd }
+  become: yes
