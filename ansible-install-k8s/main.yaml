@@ -1,0 +1,37 @@
+
+- hosts: all
+  name: setup kube prerequisites
+  roles:
+    - {  role: kube-prerequisites, tags: kube-prerequisites}
+
+############## Install containerd docker engine and Docker Compose###############
+- hosts: all
+  name: Install containerd
+  roles:
+    - { role: containerd, tags: containerd }
+  become: true
+
+- hosts: all
+  name : Install kubeadm kuebctl kubelet
+  roles:
+    - { role: kubelet-kubeadm-kubectl, tags: kubelet-kubeadm-kubectl}
+  become: true
+  
+############## Configure the cluster ###############
+- hosts: master
+  name: cluster init and installing flannel networking solution
+  become: true
+  roles:
+    - { role: init-cluster, tags: init-cluster }
+
+############## Join the worker nodes to the cluster ###############
+- hosts: workers
+  name: copy token to workers
+  become: true
+  tasks:
+    - name: save join token to workers
+      copy: 
+          src: "{{ playbook_dir }}/buffer/join.sh"
+          dest: "./"
+    - name: execute join token
+      command: sh join.sh

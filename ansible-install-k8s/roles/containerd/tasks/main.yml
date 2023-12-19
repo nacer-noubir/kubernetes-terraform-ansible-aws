@@ -2,7 +2,8 @@
   apt:
     pkg:
     - ca-certificates
-    - curl gnupg
+    - curl
+    - gnupg
     - lsb-release
     - apt-transport-https
     state: latest
@@ -41,6 +42,8 @@
     backrefs: yes
 
 - name: Restaring Containerd
-  systemd:ont
+  systemd:
     state: restarted
     name: containerd
+    enabled: yes
+    daemon-reload: yes

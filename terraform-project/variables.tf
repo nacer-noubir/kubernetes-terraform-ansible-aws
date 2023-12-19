@@ -15,6 +15,9 @@ variable "public_key_path" {
   default = "/home/ec2-user/.ssh/id_rsa.pub"
 }
 
+variable "private_ssh_key" {
+  default = "/home/ec2-user/.ssh/id_rsa"
+}
 variable "key_pair_name" {
   default = "cluster_key"
 }

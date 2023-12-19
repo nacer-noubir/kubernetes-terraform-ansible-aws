@@ -23,16 +23,35 @@ module "workers" {
     key_pair_name = var.key_pair_name
 }
 
-resource "local_file" "ansible-inventory" {
+resource "local_file" "ansible_inventory" {
   depends_on = [
     module.controller,
     module.workers
   ]
     content = templatefile(
-      "hosts.ini",
+      "../hosts.ini",
       {
-        workers = module.workers.workers_public_ips
         master  = module.controller.controller_public_ip
+        workers = module.workers.workers_public_ips
       })
-      filename = "ansible_inventory.ini"
+      filename = "../inventory.ini"
+}
+
+resource "null_resource" "execute-playbook" {
+  provisioner "remote-exec" {
+    connection {
+      type        = "ssh"
+      host        = module.controller.controller_public_ip
+      user        = "ubuntu"
+      private_key = file(var.private_ssh_key)
+    }
+
+    inline = ["echo 'connected!'"]
+  }
+  depends_on = [
+    local_file.ansible_inventory
+  ]
+  provisioner "local-exec" {
+    command = "ansible-playbook -i ../inventory.ini --private-key ${var.private_ssh_key} '${path.cwd}/../ansible-install-k8s/main.yaml"
+  }
 }

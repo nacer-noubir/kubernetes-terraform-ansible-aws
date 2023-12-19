@@ -1,11 +1,13 @@
 ---
 ############### Install and configure prerequisites  ###############
 - name: Create the file for Forwarding IPv4 and iptables modules
+  become: true
   file:
     path: /etc/modules-load.d/k8s.conf
     state: touch
 
 - name: configure Forwarding IPv4 and letting iptables see bridged traffic 
+  become: true
   blockinfile:
     path: /etc/modules-load.d/k8s.conf
     block: |
@@ -13,6 +15,7 @@
       br_netfilter
 
 - name: modprobe overlay
+  become: true
   community.general.modprobe:
       name: overlay
       state: present
@@ -23,6 +26,7 @@
 - debug: msg={{overlay.stdout_lines}}
 
 - name: modprobe br_netfilter
+  become: true
   community.general.modprobe:
       name: br_netfilter
       state: present
@@ -33,6 +37,7 @@
 - debug: msg={{br_netfilter.stdout_lines}}
 
 - name:  sysctl params required by setup, params persist across reboots
+  become: true
   sysctl:
     name: "{{ item }}"
     value: '1'

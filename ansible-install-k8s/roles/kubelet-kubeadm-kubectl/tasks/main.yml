@@ -1,0 +1,35 @@
+    - name: add Kubernetes apt-key
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
+
+    - name: add Kubernetes' APT repository
+      apt_repository:
+        repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+        state: present
+        filename: 'kubernetes'
+
+    - name: install Kubelet
+      apt:
+        name: kubelet=1.28.*
+        state: present
+        update_cache: true
+
+    - name: install Kubeadm
+      apt:
+        name: kubeadm=1.28.*
+        state: present
+
+    - name: install kubectl
+      apt:
+        name: kubectl=1.28.*
+        state: present
+  
+    - name: hold kubeadm kubeadm kubectl
+      dpkg_selections:
+        name: "{{ item }}"
+        selection: hold
+      loop:
+        - kubelet
+        - kubeadm
+        - kubectl
