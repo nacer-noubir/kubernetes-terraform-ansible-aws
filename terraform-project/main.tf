@@ -52,6 +52,6 @@ resource "null_resource" "execute-playbook" {
     local_file.ansible_inventory
   ]
   provisioner "local-exec" {
-    command = "ansible-playbook -i ../inventory.ini --private-key ${var.private_ssh_key} '${path.cwd}/../ansible-install-k8s/main.yaml"
+    command = "ansible-playbook -i ../inventory.ini --private-key ${var.private_ssh_key} '${path.cwd}/../ansible-install-k8s/main.yaml'"
   }
 }

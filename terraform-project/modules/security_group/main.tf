@@ -16,6 +16,17 @@ resource "aws_security_group" "allow_tls_http_ssh" {
       prefix_list_ids = []
     },
     {
+      description      = "TLS"
+      from_port        = 6443
+      to_port          = 6443
+      protocol         = "tcp"
+      cidr_blocks      = var.allowed_cidr
+      ipv6_cidr_blocks = [ "::/0" ]
+      self = false
+      security_groups = []
+      prefix_list_ids = []
+    },
+    {
       description      = "HTTP"
       from_port        = 80
       to_port          = 80

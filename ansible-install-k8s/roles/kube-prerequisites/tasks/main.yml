@@ -53,3 +53,16 @@
     sysctl net.bridge.bridge-nf-call-iptables net.bridge.bridge-nf-call-ip6tables net.ipv4.ip_forward
   register: bridge_net
 - debug: msg={{bridge_net.stdout_lines}}
+
+- name: install pip3
+  become: true
+  apt:
+    name: python3-pip
+    state: present
+
+- name: install pre-requisites for python
+  pip:
+    name:
+      - openshift
+      - pyyaml
+      - kubernetes 

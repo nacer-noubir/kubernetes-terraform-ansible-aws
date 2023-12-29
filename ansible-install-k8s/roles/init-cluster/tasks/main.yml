@@ -25,6 +25,18 @@
           mode: 0755
           remote_src: true
 
+    ############## download and apply the calico network add-on ###############
+    - name: Download calico manifest to the cluster.
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/calico.yaml
+        dest: ~/calico.yaml
+        mode: '0664'
+
+    - name: Apply calico manifest to the cluster.
+      kubernetes.core.k8s:
+        state: present
+        src: ~/calico.yaml
+
     ############## Create the workers join ###############
     - name: create join token
       shell: sudo kubeadm token create --print-join-command
